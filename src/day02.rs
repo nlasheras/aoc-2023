@@ -1,6 +1,7 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
 use regex::Regex;
+use std::cmp;
 
 #[derive(Clone)]
 pub struct CubeSet {
@@ -44,6 +45,14 @@ impl CubeGame {
     pub fn is_possible(&self) -> bool {
         self.sets.iter().all(|s| s.r <= 12 && s.g <= 13 && s.b <= 14)
     }
+
+    pub fn power(&self) -> u64 {
+        let max_cubes = self.sets.iter().fold((0,0,0), |tuple, s| {
+            (cmp::max(tuple.0, s.r), cmp::max(tuple.1, s.g), cmp::max(tuple.2, s.b))
+        });
+        (max_cubes.0 * max_cubes.1 * max_cubes.2) as u64
+    }
+
 }
 
 impl CubeSet {
@@ -86,6 +95,12 @@ pub fn solve_part1(entries: &[CubeGame]) -> u64 {
     })
 }
 
+#[aoc(day2, part2)]
+pub fn solve_part2(entries: &[CubeGame]) -> u64 {
+    entries.iter().fold(0, |sum, g| {
+        sum + g.power()
+    })
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -100,6 +115,18 @@ mod tests {
     fn test_day2_part1_game3() {
         let input = CubeGame::from("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red");
         assert_eq!(input.is_possible(), false);
+    }
+
+    #[test]
+    fn test_day2_part2_game1() {
+        let input = CubeGame::from("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
+        assert_eq!(input.power(), 48);
+    }
+
+    #[test]
+    fn test_day2_part2_game3() {
+        let input = CubeGame::from("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red");
+        assert_eq!(input.power(), 1560);
     }
 
 }
