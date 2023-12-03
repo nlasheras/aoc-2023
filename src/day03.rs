@@ -1,5 +1,6 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
+use itertools::Itertools;
 
 use crate::utils::Grid;
 
@@ -83,8 +84,7 @@ pub fn get_gears(grid: &Grid<char>) -> Vec<(u64, u64)> {
                     .map(|p| p.number)
                     .collect();
                 if adjacent_parts.len() == 2 {
-                    let mut it = adjacent_parts.iter();
-                    gears.push((*it.next().unwrap(), *it.next().unwrap()))
+                    gears.push(adjacent_parts.iter().cloned().collect_tuple().unwrap());
                 }
             }
         }
