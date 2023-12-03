@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use std::fmt;
-use std::ops;
 
 // Grid by Belén Albeza
 // https://github.com/belen-albeza/aoc-2021/blob/main/src/utils.rs
