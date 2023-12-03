@@ -34,34 +34,29 @@ pub struct Part {
 }
 
 pub fn get_parts(grid: &Grid<char>) -> Vec<Part> {
-    let mut ret = Vec::new();
-    let mut current_part : u64 = 0;
-    let mut is_part = false;
+    let mut parts = Vec::new();
+    let mut current_number : u64 = 0;
+    let mut is_valid_part = false;
     for y in 0..grid.size().1 as i32 {
-        for x in 0..grid.size().0 as i32 {
+        let grid_width = grid.size().0 as i32;
+        for x in 0..grid_width {
             let c = grid.cell_at(x, y).unwrap();
-            if c.is_numeric() {
-                current_part = current_part * 10 + c.to_digit(10).unwrap() as u64;
-                is_part = is_part || has_part_neighbors(grid, (x, y));
+            let to_digit = c.to_digit(10);
+            if let Some(digit) = to_digit {
+                current_number = current_number * 10 + digit as u64;
+                is_valid_part = is_valid_part || has_part_neighbors(grid, (x, y));
             }
-            else {
-                if is_part {
-                    let startx = x - current_part.ilog10() as i32 - 1;
-                    ret.push(Part{number: current_part, pos:(startx, y)});
+            if to_digit.is_none() || x == grid_width - 1 {
+                if is_valid_part {
+                    let startx = x - current_number.ilog10() as i32 - 1;
+                    parts.push(Part{number: current_number, pos:(startx, y)});
                 }
-                current_part = 0;
-                is_part = false; 
+                current_number = 0;
+                is_valid_part = false; 
             }
         }
-        // check once again when end of line
-        if is_part {
-            let startx = grid.size().0 as i32 - 1 - current_part.ilog10() as i32 - 1;
-            ret.push(Part{number: current_part, pos:(startx, y)});
-        }
-        current_part = 0;
-        is_part = false; 
     }
-    ret
+    parts
 }
 
 pub fn get_part_numbers(grid: &Grid<char>) -> Vec<u64> {
@@ -75,6 +70,7 @@ impl Part {
         pos.0 >= self.pos.0 - 1 && pos.0 <= self.pos.0 + w + 1
     }
 }
+
 pub fn get_gears(grid: &Grid<char>) -> Vec<(u64, u64)> {
     let mut gears = Vec::new();
     let parts = get_parts(grid);
@@ -82,11 +78,13 @@ pub fn get_gears(grid: &Grid<char>) -> Vec<(u64, u64)> {
         for x in 0..grid.size().0 as i32 {
             let c = grid.cell_at(x, y).unwrap();
             if c == '*' {
-                let adjacent_parts : Vec<&Part> = parts.iter()
-                    .filter(|p| p.is_adjacent((x, y))).collect();
+                let adjacent_parts : Vec<u64> = parts.iter()
+                    .filter(|p| p.is_adjacent((x, y)))
+                    .map(|p| p.number)
+                    .collect();
                 if adjacent_parts.len() == 2 {
-                    gears.push((adjacent_parts.iter().nth(0).unwrap().number,
-                                adjacent_parts.iter().nth(1).unwrap().number));
+                    let mut it = adjacent_parts.iter();
+                    gears.push((*it.next().unwrap(), *it.next().unwrap()))
                 }
             }
         }
