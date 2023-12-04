@@ -1,6 +1,10 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
+
 use std::collections::BTreeSet;
+
+use std::iter;
+use std::cmp;
 
 type Line = (Vec<u64>, BTreeSet<u64>);
 
@@ -26,24 +30,39 @@ pub fn parse_input(input: &str) -> Vec<Line> {
         .collect()
 }
 
+pub fn count_matches(input: &Line) -> u32 {
+    input.0.iter().filter(|n| input.1.contains(n)).count() as u32
+}
+
 pub fn points_line(input: &Line) -> u64 {
-    let mut points = 0;
-    for n in &input.0 {
-        if input.1.contains(&n) {
-            if points == 0 {
-                points = 1;
-            }
-            else {
-                points *= 2;
-            }
-        }
+    let count = count_matches(input);
+    if count > 0 {
+        return 2u64.pow(count - 1)
     }
-    points
+    0
 }
 
 #[aoc(day4, part1)]
 pub fn sum_points(input: &[Line]) -> u64 {
     input.iter().fold(0, |sum, l| sum + points_line(l))
+}
+
+pub fn get_copies(input: &[Line]) -> Vec<u64> {
+    let mut ret : Vec<u64> = iter::repeat(1).take(input.len()).collect();
+    for i in 0..input.len() {
+        let l = &input[i];
+        let points = count_matches(l) as usize;
+        let copies = ret[i];
+        for j in i+1..cmp::min(i+points+1, input.len()) {
+            ret[j] += copies
+        }
+    }
+    ret
+}
+
+#[aoc(day4, part2)]
+pub fn sum_copies(input: &[Line]) -> u64 {
+    get_copies(input).iter().fold(0, |sum, n| sum + n)
 }
 
 #[cfg(test)]
@@ -62,5 +81,11 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
     fn test_day4_part1() {
         let input = parse_input(DAY04_EXAMPLE);
         assert_eq!(sum_points(&input), 13);
+    }
+
+    #[test]
+    fn test_day4_part2() {
+        let input = parse_input(DAY04_EXAMPLE);
+        assert_eq!(sum_copies(&input), 30);
     }
 }
