@@ -1,5 +1,6 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
+use itertools::Itertools;
 use std::iter::zip;
 
 #[aoc_generator(day6)]
@@ -36,6 +37,15 @@ pub fn count_winning_times(input: &[(u64, u64)]) -> u64 {
     input.iter().map(|p| higher_bound(p) - lower_bound(p) + 1).product()
 }
 
+#[aoc(day6, part2)]
+pub fn count_winning_times_concat_numbers(input: &[(u64, u64)]) -> u64 {
+    let t = input.iter().map(|p| p.0.to_string()).join("").parse::<u64>().unwrap();
+    let d = input.iter().map(|p| p.1.to_string()).join("").parse::<u64>().unwrap();
+    
+    let p = (t, d);
+    higher_bound(&p) - lower_bound(&p) + 1
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,4 +69,11 @@ Distance:  9  40  200";
     fn test_day6_higher_bound() {
         assert_eq!(higher_bound(&(7, 9)), 5)
     }
+
+    #[test]
+    fn test_day6_part2() {
+        let input = parse_input(DAY06_EXAMPLE);
+        assert_eq!(count_winning_times_concat_numbers(&input), 71503)
+    }
+
 }
