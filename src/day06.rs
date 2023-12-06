@@ -12,26 +12,23 @@ pub fn parse_input(input: &str) -> Vec<(u64, u64)> {
     zip(times, distances).collect()
 }
 
-
+// solving with a quadratic in the form of t*press2 -t*press + d = 0
 pub fn lower_bound(input: &(u64, u64)) -> u64 {
-    let (t, d) = *input;
-    for press in 0..t {
-        if (t - press)*press > d {
-            return press
-        }
-    }
-    0
+    let b : f64 = input.0 as f64 * -1f64;
+    let c = input.1 as f64;
+    
+    let x = (-b - f64::sqrt(b.powf(2f64) - 4f64*c)) / 2f64;
+    f64::ceil(x + 0.0001f64) as u64
 }
 
 pub fn higher_bound(input: &(u64, u64)) -> u64 {
-    let (t, d) = *input;
-    for press in (0..t).rev() {
-        if (t - press)*press > d {
-            return press
-        }
-    }
-    0
+    let b : f64 = input.0 as f64 * -1f64;
+    let c = input.1 as f64;
+    
+    let x = (-b + f64::sqrt(b.powf(2f64) - 4f64*c)) / 2f64;
+    f64::floor(x - 0.0001f64) as u64
 }
+
 #[aoc(day6, part1)]
 pub fn count_winning_times(input: &[(u64, u64)]) -> u64 {
     input.iter().map(|p| higher_bound(p) - lower_bound(p) + 1).product()
