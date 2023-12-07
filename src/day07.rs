@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 
 
-#[derive(Clone, PartialEq, PartialOrd, Eq)]
+#[derive(Clone)]
 pub struct Hand
 {
     pub cards: Vec<char>
@@ -25,12 +25,12 @@ enum HandStrength
     HighCard
 }
 
-pub fn get_card_strength(c: &char) -> u32 {
+pub fn get_card_strength(c: &char, use_jokers: bool) -> u32 {
     match c {
         'A' => 14,
         'K' => 13,
         'Q' => 12,
-        'J' => 11,
+        'J' => if use_jokers { 1 } else { 11 },
         'T' => 10,
         _ => c.to_digit(10).unwrap()
     }
@@ -41,16 +41,23 @@ impl Hand {
         Hand { cards: input.chars().collect() }
     }
 
-    fn get_strength(&self) -> HandStrength {
+    fn get_strength(&self, use_jokers: bool) -> HandStrength {
         let mut map: BTreeMap<char, u32> = BTreeMap::new();
+        let mut jokers = 0;
         for c in &self.cards {
-            *map.entry(*c).or_insert(0) += 1;
+            if use_jokers && *c == 'J' {
+                jokers += 1;
+            }
+            else {
+                *map.entry(*c).or_insert(0) += 1;
+            }
         }
         let groups : Vec<(char, u32)> = map.iter().sorted_by(|a, b| 
             a.1.cmp(b.1).reverse()
         ).map(|p| (*p.0, *p.1)).collect();
 
-        match groups[0].1 {
+        let bigger_group = if groups.len() > 0 { groups[0].1 }  else { 0 };
+        match bigger_group + jokers {
             5 => HandStrength::FiveOfAKind,
             4 => HandStrength::FourOfAKind,
             3 => {
@@ -68,16 +75,14 @@ impl Hand {
             _ => HandStrength::HighCard
         }
     }
-}
 
-impl Ord for Hand {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let s1 = self.get_strength();
-        let s2 = other.get_strength();
+    fn cmp(&self, other: &Self, use_jokers: bool) -> Ordering {
+        let s1 = self.get_strength(use_jokers);
+        let s2 = other.get_strength(use_jokers);
         if s1 == s2 {
             for i in 0..5 {
-                let cs1 = get_card_strength(&self.cards[i]);
-                let cs2 = get_card_strength(&other.cards[i]);
+                let cs1 = get_card_strength(&self.cards[i], use_jokers);
+                let cs2 = get_card_strength(&other.cards[i], use_jokers);
                 if cs1 > cs2 {
                     return Ordering::Greater
                 }
@@ -90,6 +95,8 @@ impl Ord for Hand {
         s1.cmp(&s2).reverse()
     }
 }
+
+
 #[aoc_generator(day7)]
 pub fn parse_input(input: &str) -> Vec<(Hand, u64)> {
     input.lines().map(|s| {
@@ -98,12 +105,22 @@ pub fn parse_input(input: &str) -> Vec<(Hand, u64)> {
     }).collect()
 }
 
-#[aoc(day7, part1)]
-pub fn count_winnings(input: &[(Hand, u64)]) -> u64 {
+
+pub fn count_winnings(input: &[(Hand, u64)], rank: fn(&Hand, &Hand) -> Ordering) -> u64 {
     input.iter()
-        .sorted_by(|a, b| a.0.cmp(&b.0))
+        .sorted_by(|a, b| rank(&a.0, &b.0))
         .enumerate()
-        .map(|p| (p.0 + 1) as u64 * p.1.1).sum()
+        .map(|(i, (_, bid))| (i + 1) as u64 * bid).sum()
+}
+
+#[aoc(day7, part1)]
+pub fn count_winnings_part1(input: &[(Hand, u64)]) -> u64 {
+    count_winnings(input, |a,b| a.cmp(&b, false))
+}
+
+#[aoc(day7, part2)]
+pub fn count_winnings_part2(input: &[(Hand, u64)]) -> u64 {
+    count_winnings(input, |a,b| a.cmp(&b, true))
 }
 
 #[cfg(test)]
@@ -119,30 +136,48 @@ QQQJA 483";
     #[test]
     fn test_day7_hand1() {
         let input = Hand::from("32T3K");
-        assert_eq!(input.get_strength(), HandStrength::OnePair);
+        assert_eq!(input.get_strength(false), HandStrength::OnePair);
     }   
 
     #[test]
     fn test_day7_hand2() {
         let input = Hand::from("T55J5");
-        assert_eq!(input.get_strength(), HandStrength::ThreeOfAKind);
+        assert_eq!(input.get_strength(false), HandStrength::ThreeOfAKind);
     }   
 
     #[test]
     fn test_day7_full_house() {
         let input = Hand::from("77788");
-        assert_eq!(input.get_strength(), HandStrength::FullHouse);
+        assert_eq!(input.get_strength(false), HandStrength::FullHouse);
     }   
 
     #[test]
     fn test_day7_two_pair() {
         let input = Hand::from("KTJJT");
-        assert_eq!(input.get_strength(), HandStrength::TwoPair);
+        assert_eq!(input.get_strength(false), HandStrength::TwoPair);
     }   
 
     #[test]
     fn test_day7_part1() {
         let input = parse_input(DAY07_EXAMPLE);
-        assert_eq!(count_winnings(&input), 6440)
+        assert_eq!(count_winnings_part1(&input), 6440)
+    }
+
+    #[test]
+    fn test_day7_hand2_part2() {
+        let input = Hand::from("T55J5");
+        assert_eq!(input.get_strength(true), HandStrength::FourOfAKind);
+    }   
+
+    #[test]
+    fn test_day7_two_pair_part2() {
+        let input = Hand::from("KTJJT");
+        assert_eq!(input.get_strength(true), HandStrength::FourOfAKind);
+    }   
+
+    #[test]
+    fn test_day7_part2() {
+        let input = parse_input(DAY07_EXAMPLE);
+        assert_eq!(count_winnings_part2(&input), 5905)
     }
 }
