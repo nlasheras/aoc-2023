@@ -14,7 +14,7 @@ pub struct Hand
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Eq, Ord)]
-enum HandStrength
+enum HandType
 {
     FiveOfAKind,
     FourOfAKind,
@@ -41,7 +41,7 @@ impl Hand {
         Hand { cards: input.chars().collect() }
     }
 
-    fn get_strength(&self, use_jokers: bool) -> HandStrength {
+    fn get_type(&self, use_jokers: bool) -> HandType {
         let mut map: BTreeMap<char, u32> = BTreeMap::new();
         let mut jokers = 0;
         for c in &self.cards {
@@ -58,41 +58,41 @@ impl Hand {
 
         let bigger_group = if groups.len() > 0 { groups[0].1 }  else { 0 };
         match bigger_group + jokers {
-            5 => HandStrength::FiveOfAKind,
-            4 => HandStrength::FourOfAKind,
+            5 => HandType::FiveOfAKind,
+            4 => HandType::FourOfAKind,
             3 => {
                 match groups[1].1 {
-                    2 => HandStrength::FullHouse,
-                    _ => HandStrength::ThreeOfAKind
+                    2 => HandType::FullHouse,
+                    _ => HandType::ThreeOfAKind
                 }
             } 
             2 => {
                 match groups[1].1 {
-                    2 => HandStrength::TwoPair,
-                    _ => HandStrength::OnePair
+                    2 => HandType::TwoPair,
+                    _ => HandType::OnePair
                 }
             }
-            _ => HandStrength::HighCard
+            _ => HandType::HighCard
         }
     }
 
     fn cmp(&self, other: &Self, use_jokers: bool) -> Ordering {
-        let s1 = self.get_strength(use_jokers);
-        let s2 = other.get_strength(use_jokers);
-        if s1 == s2 {
+        let t1 = self.get_type(use_jokers);
+        let t2 = other.get_type(use_jokers);
+        if t1 == t2 {
             for i in 0..5 {
-                let cs1 = get_card_strength(&self.cards[i], use_jokers);
-                let cs2 = get_card_strength(&other.cards[i], use_jokers);
-                if cs1 > cs2 {
+                let s1 = get_card_strength(&self.cards[i], use_jokers);
+                let s2 = get_card_strength(&other.cards[i], use_jokers);
+                if s1 > s2 {
                     return Ordering::Greater
                 }
-                else if cs1 < cs2 {
+                else if s1 < s2 {
                     return Ordering::Less;
                 }
             }
             panic!();
         }
-        s1.cmp(&s2).reverse()
+        t1.cmp(&t2).reverse()
     }
 }
 
@@ -136,25 +136,25 @@ QQQJA 483";
     #[test]
     fn test_day7_hand1() {
         let input = Hand::from("32T3K");
-        assert_eq!(input.get_strength(false), HandStrength::OnePair);
+        assert_eq!(input.get_type(false), HandType::OnePair);
     }   
 
     #[test]
     fn test_day7_hand2() {
         let input = Hand::from("T55J5");
-        assert_eq!(input.get_strength(false), HandStrength::ThreeOfAKind);
+        assert_eq!(input.get_type(false), HandType::ThreeOfAKind);
     }   
 
     #[test]
     fn test_day7_full_house() {
         let input = Hand::from("77788");
-        assert_eq!(input.get_strength(false), HandStrength::FullHouse);
+        assert_eq!(input.get_type(false), HandType::FullHouse);
     }   
 
     #[test]
     fn test_day7_two_pair() {
         let input = Hand::from("KTJJT");
-        assert_eq!(input.get_strength(false), HandStrength::TwoPair);
+        assert_eq!(input.get_type(false), HandType::TwoPair);
     }   
 
     #[test]
@@ -166,13 +166,13 @@ QQQJA 483";
     #[test]
     fn test_day7_hand2_part2() {
         let input = Hand::from("T55J5");
-        assert_eq!(input.get_strength(true), HandStrength::FourOfAKind);
+        assert_eq!(input.get_type(true), HandType::FourOfAKind);
     }   
 
     #[test]
     fn test_day7_two_pair_part2() {
         let input = Hand::from("KTJJT");
-        assert_eq!(input.get_strength(true), HandStrength::FourOfAKind);
+        assert_eq!(input.get_type(true), HandType::FourOfAKind);
     }   
 
     #[test]

@@ -20,3 +20,11 @@ Forgot to write the log. Was a bit trickier to parse than to solve. For part 2 I
 ### Day 5
 
 Every day I'm getting more used to parse the input. Today still has some work to do tomorrow (Independence Day), since I just relied on brute forcing part 2, but I'm pretty sure there is something smart to do. 
+
+### Day 6
+
+I had some plans for the day, since it was a holiday in Finland so I tried to be efficient with my time. I started with a straight forward implementation to get the higher and lower bounds and that worked pretty well for both parts of the problem. Still, after getting the stars I had some time so I got pen and paper and just did the math and implemented the solution using the equation. I tried to use `f64::EPSILON` but the rounding didn't work so I just took it easy and used a *0.0001* for the edge case that the solution is round number.
+
+### Day 7
+
+Didn't have time in the morning for this one. My logic to get the groups of matches may not be the nicest, but was pretty stright forward to get all the options. Then it was just figuring out how to use `sorted_by` from itertools worked to get the hands sorted properly. For part 2 I was able to get the answer by hacking my code pretty fast, to get the final version, I had to learn how to pass functions as parameters, so I could make my rank have an extra parameter to use the *jokers*. 
