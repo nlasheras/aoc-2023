@@ -28,3 +28,7 @@ I had some plans for the day, since it was a holiday in Finland so I tried to be
 ### Day 7
 
 Didn't have time in the morning for this one. My logic to get the groups of matches may not be the nicest, but was pretty stright forward to get all the options. Then it was just figuring out how to use `sorted_by` from itertools worked to get the hands sorted properly. For part 2 I was able to get the answer by hacking my code pretty fast, to get the final version, I had to learn how to pass functions as parameters, so I could make my rank have an extra parameter to use the *jokers*. 
+
+### Day 8
+
+Pretty straight-forward day. For part 2 I started reworking the solution to accept many inputs, but when running it with the input saw that it seemed to take a bit. Without thinking too much I realized the trick and that was pretty easy to implement since the `num` crate provides the functionality. 
