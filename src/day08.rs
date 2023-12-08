@@ -25,7 +25,20 @@ pub fn parse_input(input: &str) -> (Vec<char>, BTreeMap<String, (String, String)
 
 #[aoc(day8, part1)]
 pub fn count_steps(input: &(Vec<char>, BTreeMap<String, (String, String)>)) -> u64 {
-    0
+    let mut count : u64 = 0;
+    let mut current = &String::from("AAA");
+    while current != "ZZZ" {
+        let node = input.1.get(current).unwrap();
+        let i = count as usize % input.0.len();
+        let instruction = input.0[i];
+        match instruction {
+            'L' => current = &node.0,
+            'R' => current = &node.1,
+            _ => panic!()
+        }
+        count += 1;
+    }
+    count
 }
 
 #[cfg(test)]
