@@ -4,6 +4,8 @@ use aoc_runner_derive::aoc_generator;
 use std::collections::BTreeMap;
 use regex::Regex;
 
+use num::integer::lcm;
+
 #[aoc_generator(day8)]
 pub fn parse_input(input: &str) -> (Vec<char>, BTreeMap<String, (String, String)>) {
     let mut parts = input.lines();
@@ -22,12 +24,10 @@ pub fn parse_input(input: &str) -> (Vec<char>, BTreeMap<String, (String, String)
     (instructions.chars().collect(), network)
 }
 
-
-#[aoc(day8, part1)]
-pub fn count_steps(input: &(Vec<char>, BTreeMap<String, (String, String)>)) -> u64 {
+pub fn count_steps(input: &(Vec<char>, BTreeMap<String, (String, String)>), node: &str) -> u64 {
     let mut count : u64 = 0;
-    let mut current = &String::from("AAA");
-    while current != "ZZZ" {
+    let mut current = &String::from(node);
+    while !current.ends_with("Z") {
         let node = input.1.get(current).unwrap();
         let i = count as usize % input.0.len();
         let instruction = input.0[i];
@@ -40,6 +40,19 @@ pub fn count_steps(input: &(Vec<char>, BTreeMap<String, (String, String)>)) -> u
     }
     count
 }
+
+#[aoc(day8, part1)]
+pub fn count_steps_from_aaa(input: &(Vec<char>, BTreeMap<String, (String, String)>)) -> u64 {
+    count_steps(input, "AAA")
+}
+
+#[aoc(day8, part2)]
+pub fn count_steps_from_all(input: &(Vec<char>, BTreeMap<String, (String, String)>)) -> u64 {
+    let start : Vec<&String> = input.1.keys().filter(|s| s.ends_with("A")).collect();
+
+    start.iter().map(|n| count_steps(input, n)).fold(1, |ret, n| lcm(ret, n))
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -58,8 +71,8 @@ ZZZ = (ZZZ, ZZZ)";
     #[test]
     fn test_day8_example1() {
         let input = parse_input(DAY08_EXAMPLE1);
-        assert_eq!(count_steps(&input), 2);
-    }   
+        assert_eq!(count_steps_from_aaa(&input), 2);
+    }
 
     const DAY08_EXAMPLE2: &str = "LLR
 
@@ -71,7 +84,24 @@ ZZZ = (ZZZ, ZZZ)";
     #[test]
     fn test_day8_example2() {
         let input = parse_input(DAY08_EXAMPLE2);
-        assert_eq!(count_steps(&input), 6);
-    }   
+        assert_eq!(count_steps_from_aaa(&input), 6);
+    }
 
+    const DAY08_EXAMPLE3: &str = "LR
+
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)";
+
+    #[test]
+    fn test_day8_example3() {
+        let input = parse_input(DAY08_EXAMPLE3);
+        assert_eq!(count_steps_from_all(&input), 6);
+    }
+    
 }
