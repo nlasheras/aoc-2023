@@ -32,3 +32,7 @@ Didn't have time in the morning for this one. My logic to get the groups of matc
 ### Day 8
 
 Pretty straight-forward day. For part 2 I started reworking the solution to accept many inputs, but when running it with the input saw that it seemed to take a bit. Without thinking too much I realized the trick and that was pretty easy to implement since the `num` crate provides the functionality. 
+
+### Day 9
+
+Today's puzzle was pretty easy to implement in Rust. The small research I did for this was to figure out what was the best way to concatenate two vectors. For the part 2 I refactored the solution to return the whole array, but since in the end only one value matter I could have probably ignored that.
