@@ -76,6 +76,18 @@ impl<T: Clone> Grid<T> {
     fn index_for(&self, x: usize, y: usize) -> usize {
         y * self.width + x
     }
+
+    pub fn println(&self, map: fn(cell: &T) -> String) {
+        let mut buffer = "".to_string();
+        for y in 0..self.size().1 {
+            for x in 0..self.size().0 {
+                let cell = self.cell_at(x as i32, y as i32).unwrap();
+                buffer.push_str(&map(&cell));
+            }
+            buffer.push('\n');
+        }
+        println!("{}", buffer)
+    }
 }
 
 impl<T: Clone + fmt::Debug> fmt::Display for Grid<T> {
