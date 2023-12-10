@@ -36,3 +36,7 @@ Pretty straight-forward day. For part 2 I started reworking the solution to acce
 ### Day 9
 
 Today's puzzle was pretty easy to implement in Rust. The small research I did for this was to figure out what was the best way to concatenate two vectors. For the part 2 I refactored the solution to return the whole array, but since in the end only one value matter I could have probably ignored that.
+
+### Day 10
+
+This one was tricky! First part was pretty easy since it was just finding the shortest path for every point of the loop (even though we were interested in the longest one). Part 2 I had to research a bit until I found about the *even-odd rule* which seemed to work for the example and the input.

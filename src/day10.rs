@@ -64,8 +64,7 @@ pub fn get_pipe_neighbors(input: &Grid<char>, pos: &(usize, usize)) -> Vec<(usiz
     ret
 }
 
-#[aoc(day10, part1)]
-pub fn farthest_point(input: &Grid<char>) -> u64 {
+pub fn get_shortest_distances(input: &Grid<char>) -> Grid<u64> {
     let start = find_start(input);
     let mut candidates : Vec<(usize, usize)> = vec![start];
     let mut dist : Grid<u64> = Grid::new(&vec![u64::MAX; input.size().0 * input.size().1], input.size().0);
@@ -86,7 +85,37 @@ pub fn farthest_point(input: &Grid<char>) -> u64 {
             dist.set_at(n.0, n.1, dist_c + 1);
         }
     }
+    return dist
+}
+
+#[aoc(day10, part1)]
+pub fn farthest_point(input: &Grid<char>) -> u64 {
+    let dist = get_shortest_distances(input);
     *dist.cells.iter().filter(|n| **n != u64::MAX).max().unwrap()
+}
+
+pub fn is_boundary_horizontal(input: &Grid<char>, pos: &(usize, usize)) -> bool {
+    // for checking the loop left to right we only care of F and 7 (clockwise turns)
+    let ns = get_pipe_neighbors(input, pos);
+    ns.contains(&(pos.0, pos.1 + 1))
+}
+
+#[aoc(day10, part2)]
+pub fn count_inside_loop(input: &Grid<char>) -> u64 {
+    let dist = get_shortest_distances(input);
+    let size = input.size();
+    let mut render : Grid<char> = Grid::new(&vec!['.'; input.size().0 * input.size().1], input.size().0);
+    for y in 0..size.1 {
+        let mut is_inside = false;
+        for x in 0..size.0 {
+            if dist.cell_at(x as i32, y as i32).unwrap() == u64::MAX {
+                render.set_at(x, y, if is_inside { 'I' } else { 'O' });
+            } else if is_boundary_horizontal(input, &(x,y)) {
+                is_inside = !is_inside;
+            }
+        }
+    }
+    render.cells.iter().filter(|c| **c == 'I').count() as u64
 }
 
 
@@ -123,4 +152,72 @@ LJ...";
         let input = parse_input(DAY10_EXAMPLE2);
         assert_eq!(farthest_point(&input), 8);
     }
+
+    const DAY10_EXAMPLE3: &str = "...........
+.S-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+...........";
+
+    #[test]
+    fn test_day10_example3() {
+        let input = parse_input(DAY10_EXAMPLE3);
+        assert_eq!(count_inside_loop(&input), 4);
+    }
+
+    const DAY10_EXAMPLE4: &str = "..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+..........";
+
+    #[test]
+    fn test_day10_example4() {
+        let input = parse_input(DAY10_EXAMPLE4);
+        assert_eq!(count_inside_loop(&input), 4);
+    }
+
+    const DAY10_EXAMPLE5: &str = ".F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...";
+
+    #[test]
+    fn test_day10_example5() {
+        let input = parse_input(DAY10_EXAMPLE5);
+        assert_eq!(count_inside_loop(&input), 8);
+    }
+
+    const DAY10_EXAMPLE6: &str = "FF7FSF7F7F7F7F7F---7
+L|LJ||||||||||||F--J
+FL-7LJLJ||||||LJL-77
+F--JF--7||LJLJ7F7FJ-
+L---JF-JLJ.||-FJLJJ7
+|F|F-JF---7F7-L7L|7|
+|FFJF7L7F-JF7|JL---7
+7-L-JL7||F7|L7F-7F7|
+L.L7LFJ|||||FJL7||LJ
+L7JLJL-JLJLJL--JLJ.L";
+    
+        #[test]
+        fn test_day10_example6() {
+            let input = parse_input(DAY10_EXAMPLE6);
+            assert_eq!(count_inside_loop(&input), 10);
+        }
+    
+         
 }
