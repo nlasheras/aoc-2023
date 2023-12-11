@@ -30,7 +30,7 @@ pub fn parse_input(input: &str) -> Cosmos  {
     Cosmos{ galaxies: galaxies, size: (grid[0].len(), grid.len())}
 }
 
-pub fn expand(input: &Cosmos) -> Cosmos {
+pub fn expand(input: &Cosmos, factor: usize) -> Cosmos {
     let expand_rows : Vec<usize> = (0..input.size.1).filter(|n| {
         !input.galaxies.iter().any(|g| g.1 == *n)
     }).collect();
@@ -42,7 +42,7 @@ pub fn expand(input: &Cosmos) -> Cosmos {
     for g in &input.galaxies {
         let offset_cols = expand_cols.iter().filter(|n| **n < g.0).count();
         let offset_rows = expand_rows.iter().filter(|n| **n < g.1).count();
-        new_galaxies.push((g.0 + offset_cols, g.1 + offset_rows));
+        new_galaxies.push((g.0 + offset_cols*(factor-1), g.1 + offset_rows*(factor-1)));
     }
     Cosmos { galaxies: new_galaxies, size: new_size }
 }
@@ -52,9 +52,8 @@ pub fn get_shortest_distance(from: &(usize, usize), to: &(usize, usize)) -> u64 
     (to.0.abs_diff(from.0) + to.1.abs_diff(from.1)) as u64
 }
 
-#[aoc(day11, part1)]
-pub fn sum_shortest_lengths(input: &Cosmos) -> u64 {
-    let expand = expand(input);
+pub fn sum_shortest_lengths(input: &Cosmos, factor: usize) -> u64 {
+    let expand = expand(input, factor);
     let mut sum = 0;
     for i in 0..expand.galaxies.len() {
         for j in i+1..expand.galaxies.len() {
@@ -63,6 +62,17 @@ pub fn sum_shortest_lengths(input: &Cosmos) -> u64 {
     }
     sum
 }
+
+#[aoc(day11, part1)]
+pub fn sum_shortest_lengths_2(input: &Cosmos) -> u64 {
+    sum_shortest_lengths(input, 2)
+}
+
+#[aoc(day11, part2)]
+pub fn sum_shortest_lengths_1million(input: &Cosmos) -> u64 {
+    sum_shortest_lengths(input, 1000000)
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -82,35 +92,46 @@ mod tests {
     #[test]
     fn test_day11_expand() {
         let input = parse_input(DAY11_EXAMPLE);
-        let expand = expand(&input);
+        let expand = expand(&input, 2);
         assert_eq!(expand.size, (13, 12));
     }
 
     #[test]
     fn test_day11_example1() {
         let input = parse_input(DAY11_EXAMPLE);
-        let expand = expand(&input);
+        let expand = expand(&input, 2);
         assert_eq!(get_shortest_distance(&expand.galaxies[0], &expand.galaxies[6]), 15);
     }
 
     #[test]
     fn test_day11_example2() {
         let input = parse_input(DAY11_EXAMPLE);
-        let expand = expand(&input);
+        let expand = expand(&input, 2);
         assert_eq!(get_shortest_distance(&expand.galaxies[2], &expand.galaxies[5]), 17);
     }
 
     #[test]
     fn test_day11_example3() {
         let input = parse_input(DAY11_EXAMPLE);
-        let expand = expand(&input);
+        let expand = expand(&input, 2);
         assert_eq!(get_shortest_distance(&expand.galaxies[7], &expand.galaxies[8]), 5);
     }
 
     #[test]
     fn test_day11_part1() {
         let input = parse_input(DAY11_EXAMPLE);
-        assert_eq!(sum_shortest_lengths(&input), 374);
+        assert_eq!(sum_shortest_lengths_2(&input), 374);
     }
 
+    #[test]
+    fn test_day11_part2_x10() {
+        let input = parse_input(DAY11_EXAMPLE);
+        assert_eq!(sum_shortest_lengths(&input, 10), 1030);
+    }
+
+    #[test]
+    fn test_day11_part2_x100() {
+        let input = parse_input(DAY11_EXAMPLE);
+        assert_eq!(sum_shortest_lengths(&input, 100), 8410);
+    }
 }
