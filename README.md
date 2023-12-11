@@ -40,3 +40,7 @@ Today's puzzle was pretty easy to implement in Rust. The small research I did fo
 ### Day 10
 
 This one was tricky! First part was pretty easy since it was just finding the shortest path for every point of the loop (even though we were interested in the longest one). Part 2 I had to research a bit until I found about the *even-odd rule* which seemed to work for the example and the input.
+
+### Day 11
+
+When reading the problem I was starting to worry about having to use A* to check for the shortest path because I was expecting the galaxy expansion to be unmanageable (*lanternfish* scale), at least in part 2. After I did the expansion of just the positions I realized that the shortest path was trivial to compute, so the rest was pretty easy. 
