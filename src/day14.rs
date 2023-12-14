@@ -11,18 +11,26 @@ pub struct World {
 }
 
 impl World {
-    pub fn simulate(&mut self) -> usize {
+    pub fn simulate(&mut self, delta: (i32, i32)) -> usize {
         let mut new_rounds = BTreeSet::new();
         let mut changes = 0;
         for r in self.rounds.iter() {
-            let x = r.0;
-            let y = r.1;
-            if y > 0 && !self.rounds.contains(&(x, y-1)) && !self.cubes.contains(&(x, y-1)) {
-                new_rounds.insert((x, y-1));
+
+            let nx = r.0 as i32 + delta.0;
+            let ny = r.1 as i32 + delta.1;
+
+            if ny < 0 || ny>= self.size.1 as i32 || nx < 0 || nx >= self.size.0 as i32 {
+                new_rounds.insert(*r);
+                continue;
+            }
+
+            let moved_r = (nx as usize, ny as usize);
+            if !self.rounds.contains(&moved_r) && !self.cubes.contains(&moved_r) {
+                new_rounds.insert(moved_r);
                 changes += 1;
             }
             else {
-                new_rounds.insert((x, y));
+                new_rounds.insert(*r);
             }
         }
         self.rounds = new_rounds;
@@ -76,7 +84,7 @@ pub fn parse_input(input: &str) -> World  {
 #[aoc(day14, part1)]
 pub fn sum_load(input: &World) -> u64 {
     let mut world = input.clone();
-    while world.simulate() > 0 { 
+    while world.simulate((0, -1)) > 0 { 
     }
     let h = world.size.1;
     world.rounds.iter().map(|p| (h - p.1) as u64 ).sum()
