@@ -48,3 +48,7 @@ When reading the problem I was starting to worry about having to use A* to check
 ### Day 13 :warning:
 
 I was a bit busy on Wednesday, so I skipped the day and did it on Thursday. Since I have 12.2 to finnish and 14 to do I just went with the straight forward solution and I'll take another look to the solution once I have more time.
+
+### Day 14
+
+Part two sounded familiar to a previous one I made in a previous year, so I just used the same cycle searching trick (I think I'll move that to an utility function because I think it's handy to have for next years).
