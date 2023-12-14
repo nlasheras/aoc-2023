@@ -17,7 +17,7 @@ Today the first part was quite easy, since I had already the `Grid` helper I was
 
 Forgot to write the log. Was a bit trickier to parse than to solve. For part 2 I had to do a slight rewrite but nothing big since it's still a smallish solution.
 
-### Day 5
+### Day 5 :warning:
 
 Every day I'm getting more used to parse the input. Today still has some work to do tomorrow (Independence Day), since I just relied on brute forcing part 2, but I'm pretty sure there is something smart to do. 
 
@@ -44,3 +44,7 @@ This one was tricky! First part was pretty easy since it was just finding the sh
 ### Day 11
 
 When reading the problem I was starting to worry about having to use A* to check for the shortest path because I was expecting the galaxy expansion to be unmanageable (*lanternfish* scale), at least in part 2. After I did the expansion of just the positions I realized that the shortest path was trivial to compute, so the rest was pretty easy. 
+
+### Day 13 :warning:
+
+I was a bit busy on Wednesday, so I skipped the day and did it on Thursday. Since I have 12.2 to finnish and 14 to do I just went with the straight forward solution and I'll take another look to the solution once I have more time.
