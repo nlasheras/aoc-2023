@@ -52,3 +52,7 @@ I was a bit busy on Wednesday, so I skipped the day and did it on Thursday. Sinc
 ### Day 14
 
 Part two sounded familiar to a previous one I made in a previous year, so I just used the same cycle searching trick (I think I'll move that to an utility function because I think it's handy to have for next years).
+
+### Day 15
+
+Part one was pretty fast to do. Part two was also pretty fast to do, I was a bit afraid that I would stumble a bit against the borrow checker, but it seems that after 15 days of Rust I have started to use the right idioms. 
