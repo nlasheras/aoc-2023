@@ -56,3 +56,7 @@ Part two sounded familiar to a previous one I made in a previous year, so I just
 ### Day 15
 
 Part one was pretty fast to do. Part two was also pretty fast to do, I was a bit afraid that I would stumble a bit against the borrow checker, but it seems that after 15 days of Rust I have started to use the right idioms. 
+
+### Day 16 :warning:
+
+Today the biggest problem I got was in Part 1, since even with the example my starting implementation was staying on a loop. My starting solution for that was just splitting the beams first time a beam passes over there, which ensures that the algorithm will end eventually. I tried a more correct version of the algorithm afterwards, but my first implementation was much slower.

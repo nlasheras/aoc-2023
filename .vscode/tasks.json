@@ -5,6 +5,11 @@
             "type": "shell",
             "label": "build aoc-autobuild",
             "command": "cargo.exe build --manifest-path target/aoc/aoc-autobuild/Cargo.toml --bin=aoc-autobuild"
+        },
+        {
+            "type": "shell",
+            "label": "run tests",
+            "command": "cargo.exe test"
         }
     ]
 }

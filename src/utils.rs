@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std::fmt;
+use std::ops;
 
 // Grid by Belén Albeza
 // https://github.com/belen-albeza/aoc-2021/blob/main/src/utils.rs
@@ -22,9 +23,18 @@ impl<T: Clone> Grid<T> {
         }
     }
 
+    pub fn from(input: &str, mapfn: fn(cell: char) -> T) -> Grid<T> {
+        let vec : Vec<Vec<T>> = input.lines().map(|s| s.chars().map(mapfn).collect()).collect();
+        let width = vec.first().unwrap().len();
+        let cells = vec.into_iter().flatten().collect::<Vec<T>>();
+        Grid::new(&cells, width)
+    }
+
     pub fn size(&self) -> (usize, usize) {
         (self.width, self.height)
     }
+    pub fn width(&self) -> usize { self.width }
+    pub fn height(&self) -> usize { self.height }
 
     pub fn cell_at(&self, x: i32, y: i32) -> Option<T> {
         if x < 0 || y < 0 || x >= self.width as i32 || y >= self.height as i32 {
@@ -100,5 +110,48 @@ impl<T: Clone + fmt::Debug> fmt::Display for Grid<T> {
             buffer.push('\n');
         }
         writeln!(f, "{}", buffer)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
+pub struct Point {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl Point {
+    pub fn new(x: i32, y: i32) -> Point {
+        Point { x, y, z: 0 }
+    }
+
+    pub fn new_3d(x: i32, y: i32, z: i32) -> Point {
+        Point { x, y, z }
+    }
+
+    pub fn manhattan_dist(&self, other: &Point) -> i32 {
+        (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs()
+    }
+}
+
+impl ops::Add<Point> for Point {
+    type Output = Point;
+    fn add(self, _rhs: Point) -> Point {
+        Point {
+            x: self.x + _rhs.x,
+            y: self.y + _rhs.y,
+            z: self.z + _rhs.z,
+        }
+    }
+}
+
+impl ops::Sub<Point> for Point {
+    type Output = Point;
+    fn sub(self, _rhs: Point) -> Point {
+        Point {
+            x: self.x - _rhs.x,
+            y: self.y - _rhs.y,
+            z: self.z - _rhs.z,
+        }
     }
 }
