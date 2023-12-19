@@ -1,5 +1,8 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
+use itertools::Itertools;
+
+use crate::utils::Point;
 
 pub struct DigOrder {
     pub dir : String,
@@ -12,7 +15,7 @@ impl DigOrder {
         let parts : Vec<&str> = input.split_whitespace().collect();
         let dir = parts[0].to_string();
         let meters = parts[1].parse::<i32>().unwrap();
-        let color = parts[2].to_string();
+        let color = String::from(&parts[2].to_string()[2..parts[2].len()-1]);
         DigOrder { dir : dir, meters: meters, color: color }
     }
 }
@@ -25,7 +28,33 @@ pub fn parse_input(input: &str) -> Vec<DigOrder>  {
 
 #[aoc(day18, part1)]
 pub fn count_cubic_meters_interior(input: &Vec<DigOrder>) -> u64 {
-    0
+    let mut current = Point::new(0, 0);
+    let mut points = vec![current];
+
+    for order in input {
+        let dir = match order.dir.as_str() {
+            "D" => Point::new(0, 1),
+            "R" => Point::new(1, 0),
+            "L" => Point::new(-1, 0),
+            "U" => Point::new(0, -1),
+            _ => panic!()
+        };
+        current = current + Point::new(order.meters * dir.x, order.meters * dir.y);
+        points.push(current);
+    }
+
+    // Shoelace formula for trapezoids
+    let pairs : Vec<(&Point, &Point)> = points.iter().tuple_windows().collect();
+    let mut sum = 0;
+    for (p0, p1) in pairs {
+        sum += (p0.y + p1.y)*(p0.x - p1.x);
+    }
+    let inside = (sum / 2) as u64;
+
+    // Pick's theorem A = i + b/2 + 1
+    let boundary = input.iter().map(|o| o.meters as u64).sum::<u64>();
+    inside + boundary/2 + 1
+
 }
 
 
