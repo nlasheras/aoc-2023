@@ -71,7 +71,7 @@ mod tests {
 4322674655533";
 
     #[test]
-    fn test_day16_part1() {
+    fn test_day17_part1() {
         let input = parse_input(DAY17_EXAMPLE);
         assert_eq!(sum_heat_loss(&input), 102);
     }
