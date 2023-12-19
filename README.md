@@ -65,3 +65,6 @@ Today the biggest problem I got was in Part 1, since even with the example my st
 
 I got stuck a bit with this problem for a while. I have tried my implementations of A* and Dijkstra but seems that there is something I'm missing on the puzzle. I'll go ahead for now and work on this during the holidays.
 
+### Day 18
+
+After a couple of days stuck on the previous problem, it was nice to get some easier ones. Being so advanced on the calendar, I discarded the idea of using a grid right away. I guessed that the idea is using math for it, and a quick search for how to compute the area of a polygon given a set of points got me to the right algorithm to get the points inside the boundaries (*Shoelace formula*). For the boundary I noticed that it was half plus one in order to match the example, but then reading the Wikipedia page for Shoelace formula I stumbled into *Pick's theorem* which is exactly that formula. Part 2 was pretty easy after having figured the math version, as it works right away. 
