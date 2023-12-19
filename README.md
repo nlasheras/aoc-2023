@@ -60,3 +60,8 @@ Part one was pretty fast to do. Part two was also pretty fast to do, I was a bit
 ### Day 16 :warning:
 
 Today the biggest problem I got was in Part 1, since even with the example my starting implementation was staying on a loop. My starting solution for that was just splitting the beams first time a beam passes over there, which ensures that the algorithm will end eventually. I tried a more correct version of the algorithm afterwards, but my first implementation was much slower.
+
+### Day 17 :stop_sign: 
+
+I got stuck a bit with this problem for a while. I have tried my implementations of A* and Dijkstra but seems that there is something I'm missing on the puzzle. I'll go ahead for now and work on this during the holidays.
+
