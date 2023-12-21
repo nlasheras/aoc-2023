@@ -45,7 +45,11 @@ This one was tricky! First part was pretty easy since it was just finding the sh
 
 When reading the problem I was starting to worry about having to use A* to check for the shortest path because I was expecting the galaxy expansion to be unmanageable (*lanternfish* scale), at least in part 2. After I did the expansion of just the positions I realized that the shortest path was trivial to compute, so the rest was pretty easy. 
 
-### Day 13 :warning:
+### Day 12 :warning:
+
+I completed this pretty late. The part 1 was pretty straightforward, and the brute-force solution was good enough for part 1. For part 2 I had to rewrite a new version of the function in order to use memoization. This one I really need to get back to, because I had to clone the input many times even though is constant because of the `memoize` crate. I need to research if it's possible to use a static or any kind of reference for this. 
+
+### Day 13 :reminder_ribbon:
 
 I was a bit busy on Wednesday, so I skipped the day and did it on Thursday. Since I have 12.2 to finnish and 14 to do I just went with the straight forward solution and I'll take another look to the solution once I have more time.
 

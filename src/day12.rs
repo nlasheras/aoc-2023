@@ -1,6 +1,7 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
 
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Row
 {
     pub record : String,
@@ -47,8 +48,56 @@ fn find_arrangements_recursive(current: &str, remaining: &str, groups: &Vec<usiz
     }
 }
 
+use memoize::memoize;
+
+#[memoize]
+pub fn find_arrangements_dp(input: Row, i: usize, g: usize, r0: u64) -> u64 {
+    /* In order to memoize the function, I do an function that brute forces the result using indexes on the already processed 
+    part of the record (i) and the current group we are looking (j) */
+    let record = &input.record;
+    let groups = &input.groups;
+    if i >= record.len() {
+        // after we have the full string processed, it's a valid arrangement if we have consumed all the groups
+        return if g == groups.len() { 1 } else { 0 }
+    }
+
+    let mut r = r0;
+    let c = record.chars().nth(i).unwrap();
+    if c != '#' {
+        // we try recursively advancing the string (assume that char i is a .)
+        r += find_arrangements_dp(input.clone(), i+1, g, 0);
+    }
+    
+    if g < groups.len() {
+        // assume that i is a # and try to match the current group g
+        let j = i + groups[g];
+        if j <= record.len() {
+            let only_damaged = record[i..j].chars().all(|c| c == '#' || c == '?');
+            let is_j_damaged = record.chars().nth(j) == Some('#');
+            if only_damaged && !is_j_damaged {
+                r += find_arrangements_dp(input.clone(), j+1, g+1, 0);
+            }
+        }
+    }
+    r
+}
+
 fn find_arrangements(input: &Row) -> u64 {
-    find_arrangements_recursive("", &input.record, &input.groups)
+    find_arrangements_dp(input.clone(), 0, 0, 0)
+}
+
+fn find_arrangements_with_fold(input: &Row) -> u64 {
+    let mut record = String::from("");
+    let mut groups = Vec::new();
+    for i in 0..5 {
+        if i > 0 {
+            record += "?";
+        }
+        record += &input.record;
+        groups.append(&mut input.groups.clone());
+    }
+    let tmp = Row{ record: record.clone(), groups: groups.clone() };
+    find_arrangements_dp(tmp, 0, 0, 0)
 }
 
 #[aoc(day12, part1)]
@@ -56,7 +105,10 @@ pub fn sum_arrangements(input: &Vec<Row>) -> u64 {
     input.iter().map(|r| find_arrangements(r)).sum() 
 }
 
-
+#[aoc(day12, part2)]
+pub fn sum_arrangements_with_fold(input: &Vec<Row>) -> u64 {
+    input.iter().map(|r| find_arrangements_with_fold(r)).sum()
+}
 
 #[cfg(test)]
 mod tests {
@@ -91,6 +143,12 @@ mod tests {
     fn test_day12_part1() {
         let input = parse_input(DAY12_EXAMPLE);
         assert_eq!(sum_arrangements(&input), 21);
+    }
+
+    #[test]
+    fn test_day12_part2() {
+        let input = parse_input(DAY12_EXAMPLE);
+        assert_eq!(sum_arrangements_with_fold(&input), 525152);
     }
 
 
