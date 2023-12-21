@@ -68,3 +68,8 @@ I got stuck a bit with this problem for a while. I have tried my implementations
 ### Day 18
 
 After a couple of days stuck on the previous problem, it was nice to get some easier ones. Being so advanced on the calendar, I discarded the idea of using a grid right away. I guessed that the idea is using math for it, and a quick search for how to compute the area of a polygon given a set of points got me to the right algorithm to get the points inside the boundaries (*Shoelace formula*). For the boundary I noticed that it was half plus one in order to match the example, but then reading the Wikipedia page for Shoelace formula I stumbled into *Pick's theorem* which is exactly that formula. Part 2 was pretty easy after having figured the math version, as it works right away. 
+
+### Day 19
+
+This one was on the laborious side but easy in part 1. For part 2 I more or less had the idea of how to do it, I was a bit afraid on how much work will be to support negating the conditions, but seems that the input didn't had any weird edge cases and only had to worry about two operations. 
+

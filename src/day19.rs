@@ -2,9 +2,11 @@ use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
 
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
+use std::collections::VecDeque;
+use std::cmp;
 use regex::Regex;
 
+#[derive(Clone)]
 pub struct RuleCond {
     pub var : char,
     pub op : char,
@@ -20,7 +22,6 @@ pub struct Rule {
 
 impl Rule {
     pub fn from(input:&str) -> Rule {
-        //px{a<2006:qkq,m>2090:A,rfg}
         let start_brace = input.find('{').unwrap();
         let end_brace = input.find('}').unwrap();
         let name = input[0..start_brace].to_string();
@@ -119,6 +120,74 @@ pub fn sum_rating_numbers(input: &(BTreeMap<String, Rule>, Vec<Part>)) -> u64 {
     accepted.iter().map(|p| p.rating_number()).sum()
 }
 
+fn negate_condition(input: &RuleCond) -> RuleCond {
+    let new_op = match input.op {
+        '>' => '<',
+        '<' => '>',
+        _ => panic!()
+    };
+    let new_number = match input.op {
+        '>' => input.number + 1, 
+        '<' => input.number -1,
+        _ => panic!()
+    };
+    RuleCond { var: input.var, op: new_op, number: new_number, result: "".to_string() }
+}
+
+#[aoc(day19, part2)]
+pub fn sum_accepted_ranges(input: &(BTreeMap<String, Rule>, Vec<Part>)) -> u64 {
+    let rules = &input.0;
+    let mut sum = 0;
+
+    // idea is to start from in and queue the chain of conditions until we find all the 'A' result
+    let mut queue = VecDeque::from([("in".to_string(), Vec::<RuleCond>::new())]);
+    while !queue.is_empty() {
+        let (name, conds) = queue.pop_front().unwrap();
+
+        if name == "A" {
+            // once we find the 'A' we can figure out which range of values arrive through that path
+            sum += ['x', 'm', 'a', 's'].iter().fold(1, |sum, var| {
+                let mut range = (1, 4000);
+                for c in conds.iter() {
+                    if c.var == *var {
+                        range = match c.op {
+                            '>' => (cmp::max(range.0, c.number + 1), range.1),
+                            '<' => (range.0, cmp::min(range.1, c.number - 1)),
+                            _ => panic!()
+                        }
+                    }
+                }
+                sum * ((range.1 - range.0) + 1) as u64
+            });
+            continue;
+        }
+
+        let rule = rules.get(&name).unwrap();
+        for i in 0..rule.conditions.len() {
+            let c = &rule.conditions[i];
+            if c.result == "R" {
+                continue;
+            }
+            let mut new = conds.clone();
+            if i > 0 {
+                // for condition after the first the range should substract all the values that flowed out in previous paths
+                new.append(&mut rule.conditions[0..i].iter().map(|c| negate_condition(c)).collect());
+            }
+            new.push(c.clone());
+            queue.push_back((c.result.clone(), new));
+        }
+
+        if rule.else_result != "R" {
+            let mut new = conds.clone();
+            new.append(&mut rule.conditions.iter().map(|c| negate_condition(c)).collect());
+            queue.push_back((rule.else_result.clone(), new));
+        }
+    }
+
+    sum
+
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -146,6 +215,12 @@ hdj{m>838:A,pv}
     fn test_day19_part1() {
         let input = parse_input(DAY19_EXAMPLE);
         assert_eq!(sum_rating_numbers(&input), 19114);
+    }
+
+    #[test]
+    fn test_day19_part2() {
+        let input = parse_input(DAY19_EXAMPLE);
+        assert_eq!(sum_accepted_ranges(&input), 167409079868000);
     }
 
 }
