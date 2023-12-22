@@ -12,10 +12,124 @@ pub fn parse_input(input: &str) -> Grid<usize>  {
     Grid::from(input, |c| c.to_string().parse::<usize>().unwrap())
 }
 
+#[derive(Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+struct PathPos {
+    pub pos : (i32, i32),
+    pub dir : (i32, i32),
+    pub straight_steps: usize,
+    pub heat_loss: u64
+}
+
+fn get_neighbors(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos> {
+    let mut ret = Vec::new();
+    for dir in [pos.dir, (pos.dir.1, pos.dir.0), (-pos.dir.1, -pos.dir.0)] {
+        if dir == pos.dir { // straight
+            let mut cost = 0;
+            let mut newpos = pos.pos;
+            for i in 0..(3-pos.straight_steps) {
+                if pos.straight_steps + i + 1 >= 4 {
+                    panic!();
+                }
+                newpos = (newpos.0 + dir.0, newpos.1 + dir.1);
+                if let Some(heat_loss) = grid.cell_at(newpos.0, newpos.1) {
+                    cost += heat_loss;
+                    ret.push(PathPos{ pos: newpos, dir: dir, straight_steps: pos.straight_steps + i + 1, heat_loss: cost as u64 })
+                }
+            }
+        } else {
+            let pos = (pos.pos.0 + dir.0, pos.pos.1 + dir.1);
+            if let Some(heat_loss) = grid.cell_at(pos.0, pos.1) {
+                ret.push(PathPos{ pos: pos, dir: dir, straight_steps: 1, heat_loss: heat_loss as u64 })
+            }
+        }
+    }
+    ret
+}
+
+fn manhattan_dist(pos: (i32, i32), goal: (i32, i32)) -> u64 {
+    ((goal.0 - pos.0).unsigned_abs() + (goal.1 - pos.1).unsigned_abs()) as u64
+}
+
+fn get_dir_unit(pos: (i32, i32), prev: (i32, i32)) -> (i32, i32) {
+    let dir = (pos.0 - prev.0, pos.1 - prev.1);
+    let abs = dir.0.abs() + dir.1.abs();
+    (dir.0 / abs, dir.1 / abs)
+}
+
+fn find_path(grid: &Grid<usize>, start: (i32, i32), end: (i32, i32)) -> Option<Vec<(i32, i32)>> {
+    let mut open_set = DoublePriorityQueue::new();
+    let start_pos = PathPos{ pos: start, dir: (1, 0), straight_steps: 1, heat_loss: 0 };
+    open_set.push(start_pos.clone(), 0);
+
+    let mut closed_set = BTreeSet::new();
+    let mut came_from = BTreeMap::new();
+
+    let inf = u64::MAX;
+    let mut g_score = BTreeMap::new();
+    g_score.insert(start_pos.clone(), 0u64);
+
+    let mut f_score = BTreeMap::new();
+    f_score.insert(start_pos.clone(), manhattan_dist(start, end));
+
+    while !open_set.is_empty() {
+        // get the element with smallest fScore
+        let (current, _priority) = open_set.pop_min().unwrap();
+        if closed_set.contains(&current) {
+            continue;
+        }
+
+        if current.pos == end {
+            let mut path = vec![current.pos];
+            let mut path_node = current;
+            while came_from.contains_key(&path_node) {
+                path_node = *came_from.get(&path_node).unwrap();
+                
+                let mut prev_pos = path[ path.len() - 1];
+                let dir = get_dir_unit(path_node.pos, prev_pos);
+                while prev_pos != path_node.pos {
+                    prev_pos = (prev_pos.0 + dir.0, prev_pos.1 + dir.1);
+                    path.push(prev_pos);
+                }
+            }
+            path.reverse();
+            return Some(path);
+        }
+
+        closed_set.insert(current);
+
+        for candidate in get_neighbors(grid, &current) {
+            if closed_set.contains(&candidate) {
+                continue;
+            }
+
+            let g_func = candidate.heat_loss;
+            let tentative_g_score = g_score.entry(current).or_insert(inf).to_owned() + g_func;
+
+            let neighbor_score = g_score.entry(candidate).or_insert(inf).to_owned();
+            if tentative_g_score < neighbor_score {
+                *came_from.entry(candidate).or_insert(current) = current;
+
+                g_score
+                    .entry(candidate)
+                    .and_modify(|e| *e = tentative_g_score)
+                    .or_insert(tentative_g_score);
+
+                let score = tentative_g_score + manhattan_dist(candidate.pos, end) as u64;
+                f_score
+                    .entry(candidate)
+                    .and_modify(|e| *e = score)
+                    .or_insert(score);
+
+                open_set.push(candidate, score);
+            }
+        }
+    }
+    None
+}
+
 fn heat_loss_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) -> u64 {
     path.iter().skip(1).map(|(x,y)| input.cell_at(*x, *y).unwrap() as u64).sum::<u64>()
 }
-
 
 fn print_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) {
     let mut buffer = "".to_string();
@@ -48,9 +162,12 @@ fn print_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) {
 
 #[aoc(day17, part1)]
 pub fn sum_heat_loss(input: &Grid<usize>) -> u64 {
+    if let Some(path) = find_path(input, (0, 0), (input.width() as i32 - 1, input.height() as i32 - 1)) {
+        //print_path(input, &path);
+        return heat_loss_path(input, &path);
+    }
     0
 }
-
 
 #[cfg(test)]
 mod tests {
