@@ -20,23 +20,20 @@ struct PathPos {
     pub heat_loss: u64
 }
 
-fn get_neighbors(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos> {
+fn get_neighbors(grid: &Grid<usize>, pos: &PathPos, max_straight: usize, min_turn: usize) -> Vec<PathPos> {
     let mut ret = Vec::new();
     for dir in [pos.dir, (pos.dir.1, pos.dir.0), (-pos.dir.1, -pos.dir.0)] {
         if dir == pos.dir { // straight
             let mut cost = 0;
             let mut newpos = pos.pos;
-            for i in 0..(3-pos.straight_steps) {
-                if pos.straight_steps + i + 1 >= 4 {
-                    panic!();
-                }
+            for i in 0..(max_straight-pos.straight_steps) {
                 newpos = (newpos.0 + dir.0, newpos.1 + dir.1);
                 if let Some(heat_loss) = grid.cell_at(newpos.0, newpos.1) {
                     cost += heat_loss;
                     ret.push(PathPos{ pos: newpos, dir: dir, straight_steps: pos.straight_steps + i + 1, heat_loss: cost as u64 })
                 }
             }
-        } else {
+        } else if pos.straight_steps >= min_turn {
             let pos = (pos.pos.0 + dir.0, pos.pos.1 + dir.1);
             if let Some(heat_loss) = grid.cell_at(pos.0, pos.1) {
                 ret.push(PathPos{ pos: pos, dir: dir, straight_steps: 1, heat_loss: heat_loss as u64 })
@@ -45,6 +42,15 @@ fn get_neighbors(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos> {
     }
     ret
 }
+
+fn get_neighbors_part1(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos> {
+    get_neighbors(grid, pos, 3, 0)
+}
+
+fn get_neighbors_ultra(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos> {
+    get_neighbors(grid, pos, 10, 4)
+}
+
 
 fn manhattan_dist(pos: (i32, i32), goal: (i32, i32)) -> u64 {
     ((goal.0 - pos.0).unsigned_abs() + (goal.1 - pos.1).unsigned_abs()) as u64
@@ -56,7 +62,7 @@ fn get_dir_unit(pos: (i32, i32), prev: (i32, i32)) -> (i32, i32) {
     (dir.0 / abs, dir.1 / abs)
 }
 
-fn find_path(grid: &Grid<usize>, start: (i32, i32), end: (i32, i32)) -> Option<Vec<(i32, i32)>> {
+fn find_path(grid: &Grid<usize>, start: (i32, i32), end: (i32, i32), get_neighbors: fn(grid: &Grid<usize>, pos: &PathPos) -> Vec<PathPos>) -> Option<Vec<(i32, i32)>> {
     let mut open_set = DoublePriorityQueue::new();
     let start_pos = PathPos{ pos: start, dir: (1, 0), straight_steps: 1, heat_loss: 0 };
     open_set.push(start_pos.clone(), 0);
@@ -162,7 +168,16 @@ fn print_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) {
 
 #[aoc(day17, part1)]
 pub fn sum_heat_loss(input: &Grid<usize>) -> u64 {
-    if let Some(path) = find_path(input, (0, 0), (input.width() as i32 - 1, input.height() as i32 - 1)) {
+    if let Some(path) = find_path(input, (0, 0), (input.width() as i32 - 1, input.height() as i32 - 1), get_neighbors_part1) {
+        //print_path(input, &path);
+        return heat_loss_path(input, &path);
+    }
+    0
+}
+
+#[aoc(day17, part2)]
+pub fn sum_heat_loss_ultra(input: &Grid<usize>) -> u64 {
+    if let Some(path) = find_path(input, (0, 0), (input.width() as i32 - 1, input.height() as i32 - 1), get_neighbors_ultra) {
         //print_path(input, &path);
         return heat_loss_path(input, &path);
     }
@@ -191,6 +206,12 @@ mod tests {
     fn test_day17_part1() {
         let input = parse_input(DAY17_EXAMPLE);
         assert_eq!(sum_heat_loss(&input), 102);
+    }
+
+    #[test]
+    fn test_day17_part2() {
+        let input = parse_input(DAY17_EXAMPLE);
+        assert_eq!(sum_heat_loss_ultra(&input), 94);
     }
 
 }
