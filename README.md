@@ -79,3 +79,6 @@ After a couple of days stuck on the previous problem, it was nice to get some ea
 
 This one was on the laborious side but easy in part 1. For part 2 I more or less had the idea of how to do it, I was a bit afraid on how much work will be to support negating the conditions, but seems that the input didn't had any weird edge cases and only had to worry about two operations. 
 
+## Day 20
+
+Part 1 was pretty easy, although I had some struggle with the borrow checker because I was storing `&str` while iterating on the System. For part 2 I don't have code since I just relied on the structure to find the minimum presses for each of the inputs of the *Conjunction* module connected to the output.
