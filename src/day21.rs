@@ -49,9 +49,6 @@ pub fn count_steps(input: &Grid<char>, steps: usize, infinite: bool) -> u64 {
                 }
             }
         }
-        if infinite && ((i+1) % input.width() == 0){
-            println!("{},{}", i+1, new_set.iter().count());
-        }
         open_set = new_set;
     }
     open_set.iter().count() as u64
@@ -63,8 +60,29 @@ pub fn count_64steps(input: &Grid<char>) -> u64 {
 }
 
 #[aoc(day21, part2)]
-pub fn print_64periods(input: &Grid<char>) -> u64 {
-    count_steps(input, input.width() * 10, true)
+pub fn extraplate_part2(input: &Grid<char>) -> u64 {
+    let size = input.width() as u64;
+    let x0 = 65u64;
+    let s0 = count_steps(input, 65, true);
+
+    let x1 = x0 + size;
+    let s1 = count_steps(input, x1 as usize, true);
+
+    let x2 = x1 + size;
+    let s2 = count_steps(input, x2 as usize, true);
+
+    let y1 = s1 - s0;
+    let y2 = s2 - s1;
+
+    let mut steps = x2;
+    let mut count = s2;
+
+    while steps < 26501365 {
+        steps += size;
+        let delta = y1 + ((steps-x1)*(y2-y1))/(x2-x1);
+        count += delta;
+    }
+    count
 }
 
 #[cfg(test)]

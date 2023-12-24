@@ -82,3 +82,7 @@ This one was on the laborious side but easy in part 1. For part 2 I more or less
 ## Day 20
 
 Part 1 was pretty easy, although I had some struggle with the borrow checker because I was storing `&str` while iterating on the System. For part 2 I don't have code since I just relied on the structure to find the minimum presses for each of the inputs of the *Conjunction* module connected to the output.
+
+### Day 21
+
+Part 1 could be simulated easily. For part 2 the simulation gets expensive pretty fast, but I was able to run around the couple of thousands steps, so I could analize the data in a spreadsheet. By playing with data I managed to find the "linear" relationship on the data over the period, so I tested with the first couple of inputs until I managed to get a formula to reliable reproduce the rest. 
