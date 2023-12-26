@@ -25,10 +25,12 @@ pub fn parse_input(input: &str) -> Vec<Row>  {
         .collect()
 }
 
+#[allow(dead_code)]
 fn get_groups(input: &str) -> Vec<usize> {
     input.split(".").map(|s| s.len()).filter(|n| *n > 0).collect()
 }
 
+#[allow(dead_code)]
 fn find_arrangements_recursive(current: &str, remaining: &str, groups: &Vec<usize>) -> u64 {
     if let Some(idx) = remaining.find("?") {
         let mut new_c = current.to_string();
@@ -46,6 +48,11 @@ fn find_arrangements_recursive(current: &str, remaining: &str, groups: &Vec<usiz
         }
         0
     }
+}
+
+#[allow(dead_code)]
+fn find_arrangements_part1(input: &Row) -> u64 { 
+    find_arrangements_recursive(&"", &input.record, &input.groups)
 }
 
 use memoize::memoize;
@@ -125,18 +132,21 @@ mod tests {
     fn test_day12_example1() {
         let row = Row::from("???.### 1,1,3");
         assert_eq!(find_arrangements(&row), 1);
+        assert_eq!(find_arrangements_part1(&row), 1);
     }
 
     #[test]
     fn test_day12_example2() {
         let row = Row::from(".??..??...?##. 1,1,3");
         assert_eq!(find_arrangements(&row), 4);
+        assert_eq!(find_arrangements_part1(&row), 4);
     }
 
     #[test]
     fn test_day12_example6() {
         let row = Row::from("?###???????? 3,2,1");
         assert_eq!(find_arrangements(&row), 10);
+        assert_eq!(find_arrangements_part1(&row), 10);
     }
 
     #[test]

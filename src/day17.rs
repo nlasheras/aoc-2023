@@ -137,6 +137,7 @@ fn heat_loss_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) -> u64 {
     path.iter().skip(1).map(|(x,y)| input.cell_at(*x, *y).unwrap() as u64).sum::<u64>()
 }
 
+#[allow(dead_code)]
 fn print_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) {
     let mut buffer = "".to_string();
     for y in 0..input.size().1 {
@@ -164,7 +165,6 @@ fn print_path(input: &Grid<usize>, path: &Vec<(i32, i32)>) {
     }
     println!("{}", buffer)
 }
-
 
 #[aoc(day17, part1)]
 pub fn sum_heat_loss(input: &Grid<usize>) -> u64 {

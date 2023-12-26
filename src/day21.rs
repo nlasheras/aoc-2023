@@ -40,7 +40,7 @@ pub fn count_steps(input: &Grid<char>, steps: usize, infinite: bool) -> u64 {
     let start = find_start(input);
     let mut open_set = BTreeSet::new();
     open_set.insert(start);
-    for i in 0..steps {
+    for _ in 0..steps {
         let mut new_set : BTreeSet<(i32, i32)> = BTreeSet::new();
         for pos in open_set.iter() {
             for (c, npos) in get_neighbors(input, pos, infinite) {
