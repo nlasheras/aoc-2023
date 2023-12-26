@@ -111,5 +111,37 @@ mod tests {
         assert_eq!(count_disintegrable_bricks(&input), 5);
     }
 
- 
+    const DAY22_REDDIT1: &str = "0,0,1~0,1,1
+1,1,1~1,1,1
+0,0,2~0,0,2
+0,1,2~1,1,2";
+
+    #[test]
+    fn test_day22_reddit1() {
+        let input = parse_input(DAY22_REDDIT1);
+        assert_eq!(count_disintegrable_bricks(&input), 3);
+    }
+
+    const DAY22_REDDIT2: &str = "0,0,1~1,0,1
+0,1,1~0,1,2
+0,0,5~0,0,5
+0,0,4~0,1,4";
+
+    #[test]
+    fn test_day22_reddit2() {
+        let input = parse_input(DAY22_REDDIT2);
+        assert_eq!(count_disintegrable_bricks(&input), 2);
+    }
+
+    const DAY22_REDDIT3: &str = "0,0,1~0,0,1
+1,1,1~1,1,1
+0,0,2~0,1,2
+0,1,3~1,1,3";
+
+    #[test]
+    fn test_day22_reddit3() {
+        let input = parse_input(DAY22_REDDIT3);
+        assert_eq!(count_disintegrable_bricks(&input), 2);
+    }
+
 }
