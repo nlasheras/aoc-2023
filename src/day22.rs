@@ -8,7 +8,6 @@ pub struct Brick {
     pub id: usize,
     pub start: Point,
     pub end: Point,
-    pub falling: bool
 }
 
 impl Brick {
@@ -17,7 +16,7 @@ impl Brick {
             let ns = s.split(",").map(|n| n.parse::<i32>().unwrap()).collect::<Vec<i32>>();
             Point::new_3d(ns[0], ns[1], ns[2])
         }).collect::<Vec<Point>>();
-        Brick{ id: 0, start: points[0], end: points[1], falling: points[0].z != 1 }
+        Brick{ id: 0, start: points[0], end: points[1] }
     }
 
     fn contains(&self, point: &Point) -> bool {
@@ -27,12 +26,19 @@ impl Brick {
     }
 
     pub fn collide(&self, other: &Brick) -> bool {
-        self.contains(&other.start) || self.contains(&other.end) || 
-        other.contains(&self.start) || other.contains(&self.end)
-    }
-
-    pub fn floor_z(&self) -> i32 {
-        self.start.z
+        for z in self.start.z..=self.end.z {
+            if z > other.end.z || z < other.start.z {
+                continue;
+            }
+            for x in self.start.x..=self.end.x {
+                for y in self.start.y..=self.end.y {
+                    if other.contains(&Point::new_3d(x, y, z)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 }
 
@@ -49,8 +55,9 @@ pub fn parse_input(input: &str) -> Vec<Brick> {
 fn fall_bricks_once(input: &Vec<Brick>) -> (usize, Vec<Brick>) {
     let mut ret = Vec::new();
     let mut changed = 0;
-    for b in input.iter() {
-        if b.floor_z() == 1 {
+    for idx in 0..input.len() {
+        let b = &input[idx];
+        if b.start.z == 1 {
             ret.push(b.clone());
             continue;
         }
@@ -59,7 +66,7 @@ fn fall_bricks_once(input: &Vec<Brick>) -> (usize, Vec<Brick>) {
         test.start.z -= 1;
         test.end.z -= 1;
 
-        if input.iter().any(|b| b.id != test.id && b.collide(&test)) {
+        if input[idx+1..input.len()].iter().any(|b| b.id != test.id && b.collide(&test)) || ret.iter().any(|b| b.collide(&test)) {
             ret.push(b.clone());
         }
         else {
@@ -82,10 +89,7 @@ use std::collections::HashMap;
 
 #[aoc(day22, part1)]
 pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
-    let mut stable = fall_bricks_until_stable(input);
-    for b in stable.iter_mut() {
-        b.falling = b.start.z > 1;
-    }
+    let stable = fall_bricks_until_stable(input);
 
     let mut supports = HashMap::<usize, Vec<usize>>::new();
     let mut supported = HashMap::<usize, Vec<usize>>::new();
@@ -139,6 +143,12 @@ mod tests {
         assert!(b1.collide(&b2));
     }
 
+    #[test]
+    fn test_day22_collide2() {
+        let b1 = Brick::from("5,6,2~5,9,2");
+        let b2 = Brick::from("3,7,2~6,7,2");
+        assert!(b1.collide(&b2));
+    }
     const DAY22_REDDIT1: &str = "0,0,1~0,1,1
 1,1,1~1,1,1
 0,0,2~0,0,2
