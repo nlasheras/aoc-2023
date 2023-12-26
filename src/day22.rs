@@ -1,6 +1,10 @@
 use aoc_runner_derive::aoc;
 use aoc_runner_derive::aoc_generator;
 
+use std::collections::BTreeSet;
+use std::collections::HashMap;
+use std::collections::VecDeque;
+
 use crate::utils::Point;
 
 #[derive(Clone)]
@@ -85,10 +89,12 @@ fn fall_bricks_until_stable(input: &Vec<Brick>) -> Vec<Brick> {
     stable
 }
 
-use std::collections::HashMap;
+pub struct BrickSupport {
+    pub supports : HashMap<usize, Vec<usize>>,
+    pub supported : HashMap<usize, Vec<usize>>
+}
 
-#[aoc(day22, part1)]
-pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
+pub fn get_supports(input: &Vec<Brick>) -> BrickSupport {
     let stable = fall_bricks_until_stable(input);
 
     let mut supports = HashMap::<usize, Vec<usize>>::new();
@@ -108,12 +114,66 @@ pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
             e2.push(b2.id);
         }
     }
+    BrickSupport{ supported: supported, supports: supports }
+}
+
+impl BrickSupport {
+    pub fn supports(&self, id: usize) -> Vec<usize> {
+        if self.supports.contains_key(&id) {
+            return self.supports.get(&id).unwrap().clone()
+        }
+        Vec::new()
+    }
+
+    pub fn supported_by(&self, id: usize) -> Vec<usize> {
+        if self.supported.contains_key(&id) {
+            return self.supported.get(&id).unwrap().clone()
+        }
+        Vec::new()
+    }
+}
+
+#[aoc(day22, part1)]
+pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
+    let helper = get_supports(input);
     let mut count = 0;
     for b in input.iter() {
-        let sup = supports.entry(b.id).or_default();
-        if sup.iter().all(|b1| supported.entry(*b1).or_default().len() > 1) {
+        let above = helper.supports(b.id);
+        // we can safely desintegrate bricks that are not the single support of another brick
+        if above.iter().all(|b1| helper.supported_by(*b1).len() > 1) {
             count += 1;
         }
+    }
+    count
+}
+
+#[aoc(day22, part2)]
+pub fn count_chain_reaction(input: &Vec<Brick>) -> u64 {
+    let helper = get_supports(input);
+    let mut count = 0;
+    for b in input.iter() {
+        let above = helper.supports(b.id);
+        if above.is_empty() {
+            continue; // won't generate a chain reaction
+        }
+        let mut falling: BTreeSet<usize> = BTreeSet::new();
+        let mut pending = VecDeque::new();
+        pending.push_back(b.id);
+        while !pending.is_empty() {
+            let p = pending.pop_front().unwrap();
+            let above = helper.supports(p);
+            // in this version we keep checking all the nodes upwards, adding all nodes supported 
+            // only by the brick or other bricks that we detect they are falling
+            for a in above {
+                let below_a = helper.supported_by(a);
+                if below_a.iter().all(|x| *x == b.id || falling.contains(x)) {
+                    if falling.insert(a) {
+                        pending.push_back(a);
+                    }
+                }
+            }
+        }
+        count += falling.len() as u64;
     }
     count
 }
@@ -134,6 +194,12 @@ mod tests {
     fn test_day22_part1() {
         let input = parse_input(DAY22_EXAMPLE);
         assert_eq!(count_disintegrable_bricks(&input), 5);
+    }
+
+    #[test]
+    fn test_day22_part2() {
+        let input = parse_input(DAY22_EXAMPLE);
+        assert_eq!(count_chain_reaction(&input), 7);
     }
 
     #[test]

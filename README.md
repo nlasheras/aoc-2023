@@ -86,3 +86,7 @@ Part 1 was pretty easy, although I had some struggle with the borrow checker bec
 ### Day 21
 
 Part 1 could be simulated easily. For part 2 the simulation gets expensive pretty fast, but I was able to run around the couple of thousands steps, so I could analize the data in a spreadsheet. By playing with data I managed to find the "linear" relationship on the data over the period, so I tested with the first couple of inputs until I managed to get a formula to reliable reproduce the rest. 
+
+### Day 22
+
+Today I had made quickly a first version that didn't work properly, I tried to find the issue for a while and even checked Reddit for extra inputs to see if maybe my algorithm wasn't correct. In the end my issue was that I was so sure of my collision that I didn't review it much and it wasn't until I made the "slow" version that I realized that the mistake was there. Luckily over the long debug I optimized the algorithm to a version that made part 2 much easier.
