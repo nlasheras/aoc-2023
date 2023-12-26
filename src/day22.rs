@@ -7,7 +7,8 @@ use crate::utils::Point;
 pub struct Brick {
     pub id: usize,
     pub start: Point,
-    pub end: Point
+    pub end: Point,
+    pub falling: bool
 }
 
 impl Brick {
@@ -16,7 +17,7 @@ impl Brick {
             let ns = s.split(",").map(|n| n.parse::<i32>().unwrap()).collect::<Vec<i32>>();
             Point::new_3d(ns[0], ns[1], ns[2])
         }).collect::<Vec<Point>>();
-        Brick{ id: 0, start: points[0], end: points[1]  }
+        Brick{ id: 0, start: points[0], end: points[1], falling: points[0].z != 1 }
     }
 
     fn contains(&self, point: &Point) -> bool {
@@ -41,6 +42,7 @@ pub fn parse_input(input: &str) -> Vec<Brick> {
     for i in 0..bs.len() {
         bs[i].id = i;
     }
+    bs.sort_by(|b1, b2| b1.start.z.cmp(&b2.start.z));
     bs
 }
 
@@ -76,17 +78,36 @@ fn fall_bricks_until_stable(input: &Vec<Brick>) -> Vec<Brick> {
     stable
 }
 
+use std::collections::HashMap;
+
 #[aoc(day22, part1)]
 pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
-    let stable = fall_bricks_until_stable(input);
-    
-    let mut count = 0;
+    let mut stable = fall_bricks_until_stable(input);
+    for b in stable.iter_mut() {
+        b.falling = b.start.z > 1;
+    }
+
+    let mut supports = HashMap::<usize, Vec<usize>>::new();
+    let mut supported = HashMap::<usize, Vec<usize>>::new();
     for i in 0..stable.len() {
         let mut test = stable.clone();
         test.remove(i);
 
-        let (changed, _) = fall_bricks_once(&test);
-        if changed == 0 {
+        let mut b = stable[i].clone();
+        b.start.z -= 1;
+        b.end.z -= 1;
+        let bs = test.iter().filter(|b1| b1.collide(&b)).collect::<Vec<&Brick>>();
+        for b2 in bs {
+            let e = supports.entry(b2.id).or_insert(vec![]);
+            e.push(b.id);
+            let e2 = supported.entry(b.id).or_insert(vec![]);
+            e2.push(b2.id);
+        }
+    }
+    let mut count = 0;
+    for b in input.iter() {
+        let sup = supports.entry(b.id).or_default();
+        if sup.iter().all(|b1| supported.entry(*b1).or_default().len() > 1) {
             count += 1;
         }
     }
@@ -109,6 +130,13 @@ mod tests {
     fn test_day22_part1() {
         let input = parse_input(DAY22_EXAMPLE);
         assert_eq!(count_disintegrable_bricks(&input), 5);
+    }
+
+    #[test]
+    fn test_day22_collide1() {
+        let b1 = Brick::from("1,0,1~1,2,1");
+        let b2 = Brick::from("0,0,1~2,0,1");
+        assert!(b1.collide(&b2));
     }
 
     const DAY22_REDDIT1: &str = "0,0,1~0,1,1
