@@ -87,7 +87,6 @@ pub fn count_disintegrable_bricks(input: &Vec<Brick>) -> u64 {
 
         let (changed, _) = fall_bricks_once(&test);
         if changed == 0 {
-            //println!("brick {} can be disintegrated", i);
             count += 1;
         }
     }
