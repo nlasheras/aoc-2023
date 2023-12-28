@@ -114,30 +114,33 @@ impl<T: Clone + fmt::Debug> fmt::Display for Grid<T> {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Point {
-    pub x: i32,
-    pub y: i32,
-    pub z: i32,
+pub struct Vector<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
+}
+pub type Point = Vector<i32>;
+
+impl<T: Default> Vector<T> {
+    pub fn new(x: T, y: T) -> Vector<T> {
+        Vector { x, y, z: T::default() }
+    }
+
+    pub fn new_3d(x: T, y: T, z: T) -> Vector<T> {
+        Vector { x, y, z }
+    }
 }
 
 impl Point {
-    pub fn new(x: i32, y: i32) -> Point {
-        Point { x, y, z: 0 }
-    }
-
-    pub fn new_3d(x: i32, y: i32, z: i32) -> Point {
-        Point { x, y, z }
-    }
-
     pub fn manhattan_dist(&self, other: &Point) -> i32 {
         (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs()
     }
 }
 
-impl ops::Add<Point> for Point {
-    type Output = Point;
-    fn add(self, _rhs: Point) -> Point {
-        Point {
+impl<T: std::ops::Add<Output = T>> ops::Add<Vector<T>> for Vector<T> {
+    type Output = Vector<T>;
+    fn add(self, _rhs: Vector<T>) -> Vector<T> {
+        Vector {
             x: self.x + _rhs.x,
             y: self.y + _rhs.y,
             z: self.z + _rhs.z,
@@ -145,13 +148,25 @@ impl ops::Add<Point> for Point {
     }
 }
 
-impl ops::Sub<Point> for Point {
-    type Output = Point;
-    fn sub(self, _rhs: Point) -> Point {
-        Point {
+impl<T: std::ops::Sub<Output = T>> ops::Sub<Vector<T>> for Vector<T> {
+    type Output = Vector<T>;
+    fn sub(self, _rhs: Vector<T>) -> Vector<T> {
+        Vector {
             x: self.x - _rhs.x,
             y: self.y - _rhs.y,
             z: self.z - _rhs.z,
+        }
+    }
+}
+
+
+impl<T: std::ops::Mul<Output = T> + Copy> ops::Mul<T> for Vector<T> {
+    type Output = Vector<T>;
+    fn mul(self, _rhs: T) -> Vector<T> {
+        Vector {
+            x: self.x * _rhs,
+            y: self.y * _rhs,
+            z: self.z * _rhs,
         }
     }
 }
