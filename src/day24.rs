@@ -61,24 +61,45 @@ pub fn count_crossing_part1(entries: &[Hailstone]) -> u64 {
     count_crossing(entries, 200000000000000, 400000000000000)
 }
 
-#[allow(dead_code)]
-fn find_crossing_3d(a: &Hailstone, b: &Hailstone) -> Option<(f64, f64, f64)> {
-    let da = a.velocity;
-	let db = b.velocity;
-	let dc = b.position - a.position;
-	
-    let div = da.cross(&db).length_sq() as f64;
-    if div == 0.0 {
-        return None;
+use std::fs::File;
+use std::io::Write;
+use std::fs;
+
+#[aoc(day24, part2)]
+pub fn add_perfect_position(entries: &[Hailstone]) -> u64 {
+
+    const HEADER : &str = "(declare-const px Int)
+(declare-const py Int)
+(declare-const pz Int)
+(declare-const vx Int)
+(declare-const vy Int)
+(declare-const vz Int)";
+    const FOOTER : &str = "(declare-const PART2 Int)
+(assert (= PART2 (+ px (+ py pz))))
+    
+(check-sat)
+(get-model)";
+
+    println!("{}\n", HEADER);
+    for (i, hailstone) in entries.iter().enumerate() {
+
+        let tvar = format!("t{}", i+1);
+        let pxi =  hailstone.position.x;
+        let pyi =  hailstone.position.y;
+        let pzi =  hailstone.position.z;
+
+        let vxi =  hailstone.velocity.x;
+        let vyi =  hailstone.velocity.y;
+        let vzi =  hailstone.velocity.z;
+
+        println!("(declare-const {tvar} Int)");
+        println!("(assert (= (+ {pxi} (* {vxi} {tvar})) (+ px (* vx {tvar}))))");
+        println!("(assert (= (+ {pyi} (* {vyi} {tvar})) (+ py (* vy {tvar}))))");
+        println!("(assert (= (+ {pzi} (* {vzi} {tvar})) (+ pz (* vz {tvar}))))");
     }
-	let s = dc.cross(&db).dot(&da.cross(&db)) as f64 / div;
-	if s >= 0.0 {
-        let x = a.position.x as f64 + a.velocity.x as f64 * s;
-        let y = a.position.y as f64 + a.velocity.y as f64 * s;
-        let z = a.position.z as f64 + a.velocity.z as f64 * s;
-		return Some((x, y, z))
-	}
-	None
+    println!("\n{}", FOOTER);
+
+    0
 }
 
 #[cfg(test)]
@@ -95,12 +116,5 @@ mod tests {
     fn test_day24_part1() {
         let input = parse_input(DAY24_EXAMPLE);
         assert_eq!(count_crossing(&input, 7, 27), 2);
-    }
-
-    #[test]
-    fn test_day24_crossing3d() {
-        let h0 = Hailstone::from("19, 13, 30 @ -2,  1, -2");
-        let res = Hailstone::from("24, 13, 10 @ -3, 1, 2");
-        assert_eq!(find_crossing_3d(&h0, &res), Some((9f64, 18f64, 20f64)));
     }
 }

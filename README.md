@@ -90,3 +90,15 @@ Part 1 could be simulated easily. For part 2 the simulation gets expensive prett
 ### Day 22
 
 Today I had made quickly a first version that didn't work properly, I tried to find the issue for a while and even checked Reddit for extra inputs to see if maybe my algorithm wasn't correct. In the end my issue was that I was so sure of my collision that I didn't review it much and it wasn't until I made the "slow" version that I realized that the mistake was there. Luckily over the long debug I optimized the algorithm to a version that made part 2 much easier.
+
+### Day 23
+
+Today second part I thought I could also brute force it since I didn't think the slopes would decrease the problem space so much. I had to write a new algorithm to simplify the maze into a graph of junctions with distances and there it was possible to find the longest route.
+
+### Day 24 
+
+I did the first part using vector math that I know relatively well, but I left second part until I was forced by day 25 to finish the 49 stars, and then I took the easy route of plugging the equations into Z3. I tried to get the bindings working in my laptop, but since it seemed to not work straight out of the box, I just printed the SMT commands and manually run `z3 day24.smt2`
+
+### Day 25 
+
+This year has been the hardest of the 3 I've done the event, I was suprised by the complexity of "Christmas day" problem, so I just decided to take the easy route after playing around with a couple of algorithms that didn't work and relied on a graph algorithm crate `rustworkx` to get the min cut using [Stoer–Wagner algorithm](https://en.wikipedia.org/wiki/Stoer%E2%80%93Wagner_algorithm).
