@@ -170,3 +170,17 @@ impl<T: std::ops::Mul<Output = T> + Copy> ops::Mul<T> for Vector<T> {
         }
     }
 }
+
+impl<T : std::ops::Mul<Output = T> + std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy> Vector<T> {
+    fn dot(&self, other: &Vector<T>) -> T {
+        self.x*other.x + self.y*other.y + self.z*other.z
+    }
+
+    fn cross(&self, other: &Vector<T>) -> Vector<T> {
+        Vector {
+            x: self.y*other.z - self.z*other.y,
+            y: self.z*other.x - self.x*other.z,
+            z: self.x*other.y - self.y*other.x
+        }
+    }
+}
