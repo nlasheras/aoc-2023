@@ -61,10 +61,6 @@ pub fn count_crossing_part1(entries: &[Hailstone]) -> u64 {
     count_crossing(entries, 200000000000000, 400000000000000)
 }
 
-use std::fs::File;
-use std::io::Write;
-use std::fs;
-
 #[aoc(day24, part2)]
 pub fn add_perfect_position(entries: &[Hailstone]) -> u64 {
 
